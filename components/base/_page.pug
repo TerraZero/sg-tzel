@@ -1,0 +1,21 @@
+doctype html
+html
+  head
+    title
+      block title
+        | Page title
+    block css-wrapper
+      block css-lib
+      block css
+        link(href='/src/css/norm.css', rel='stylesheet')
+    block js-wrapper
+      block js-lib
+        script(src='/src/lib/js/jquery.js')
+      block js
+
+  body
+    block body
+      #screen
+        block screen
+          #page
+            block page

@@ -1,0 +1,13 @@
+extends page.pug
+
+block append sys-styles
+  +styletag('component.css')
+
+block body
+  .screen
+    .screen--left
+    .screen--right
+      .component
+        .component--top
+          h1 #{title}
+        .component--content

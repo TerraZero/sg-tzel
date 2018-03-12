@@ -1,5 +1,37 @@
 {
   "server": {
     "port": 9090
+  },
+  "paths": {
+    "sass": {
+      "watch": [
+        "system/styles/**/*.sass",
+        "components/**/*.sass"
+      ],
+      "files": [
+        "system/styles/**/*.sass",
+        "components/**/*.sass",
+        "!components/**/_*.sass"
+      ],
+      "dest": "web/src/css"
+    },
+    "pug": {
+      "watch": [
+        "system/layouts/**/*.pug",
+        "components/**/*.pug"
+      ],
+      "files": [
+        "components/**/*.pug",
+        "!components/**/_*.pug"
+      ],
+      "dest": "web"
+    },
+    "lib": {
+      "files": [
+        "lib/**/*.*",
+        "system/lib/**/*.*"
+      ],
+      "dest": "web/src/lib"
+    }
   }
 }

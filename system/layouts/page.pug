@@ -1,0 +1,28 @@
+mixin scripttag(url)
+  script(src=url)
+
+mixin styletag(url)
+  link(href='/src/css/' + url, rel='stylesheet')
+
+doctype html
+html
+  head
+    title
+      | #{title}
+
+    block sys-styles
+      +styletag('sg-root.css')
+
+    block styles
+      each style in styles
+        +styletag(style)
+
+    block sys-scripts
+
+    block scripts
+      each script in scripts
+        +scripttag(script)
+
+  body
+    block body
+      | !{body}

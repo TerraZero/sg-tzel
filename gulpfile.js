@@ -1,17 +1,25 @@
 const fs = require('graceful-fs');
 const gulp = require('gulp');
 const cheerio = require('cheerio');
+const pug = require('pug');
 
 const sass = require('gulp-sass');
-const pug = require('gulp-pug');
+const gpug = require('gulp-pug');
 
 const concat = require('gulp-concat');
 const cheerioGulp = require('gulp-cheerio');
 const through = require('gulp-through');
 
 const browserSync = require('browser-sync').create();
+const SGManager = require('./system/system');
+const sg = new SGManager({
+  root: __dirname,
+});
+
+
 
 const settings = require('./settings.json');
+
 
 
 const errorHandler = function (name) {
@@ -25,38 +33,35 @@ const errorHandler = function (name) {
   };
 };
 
-const paths = {
-  sass: {
-    watch: 'components/**/*.sass',
-    files: ['components/**/*.sass', '!components/**/_*.sass'],
-    dest: 'web/src/css',
-  },
-  pug: {
-    watch: 'components/**/*.pug',
-    files: ['components/**/*.pug', '!components/**/_*.pug'],
-    dest: 'web',
-  },
-  lib: {
-    files: 'lib/**/*.*',
-    dest: 'web/src/lib',
-  },
-};
-
 gulp.task('sass', function () {
-  return gulp.src(paths.sass.files)
+  return gulp.src(settings.paths.sass.files)
     .pipe(sass())
     .on('error', errorHandler('sass'))
-    .pipe(gulp.dest(paths.sass.dest))
+    .pipe(gulp.dest(settings.paths.sass.dest))
     .pipe(browserSync.stream());
 });
 
 gulp.task('pug', function () {
-  return gulp.src(paths.pug.files)
-    .pipe(pug({
+  var indexes = [];
+
+
+  return gulp.src(settings.paths.pug.files)
+    .pipe(gpug({
       basedir: __dirname + '/components',
     }))
     .on('error', errorHandler('pug'))
-    .pipe(throughs(function (file, config) {
+    .pipe(through('rewite', function (file, config) {
+      const template = sg.getTemplate('component');
+      const rendered = pug.render(template.content, {
+        title: 'Component - item-a',
+        scripts: ['hallo/shdsff.js'],
+        styles: ['hallo/shdsff.css'],
+        body: file.contents.toString(),
+        filename: './system/' + template.filename,
+      });
+      indexes.push(file.path);
+      file.contents = new Buffer(rendered);
+      /*
       const categories = file.relative.split('/');
       const name = categories.pop().split('.')[0];
       const script = file.base + categories.join('/') + '/' + name + '.js';
@@ -76,13 +81,17 @@ gulp.task('pug', function () {
       }
 
       done();
-    }))
-    .pipe(gulp.dest(paths.pug.dest));
+      */
+    })())
+    .pipe(gulp.dest(settings.paths.pug.dest))
+    .on('finish', function () {
+      console.log(indexes);
+    });
 });
 
 gulp.task('lib', function () {
-  return gulp.src(paths.lib.files)
-    .pipe(gulp.dest(paths.lib.dest));
+  return gulp.src(settings.paths.lib.files)
+    .pipe(gulp.dest(settings.paths.lib.dest));
 });
 
 gulp.task('build', ['sass', 'pug', 'lib']);
@@ -92,8 +101,8 @@ gulp.task('watch', ['sass', 'pug', 'lib'], function () {
     proxy: 'localhost:' + settings.server.port,
   });
 
-  gulp.watch(paths.sass.watch, ['sass']);
-  gulp.watch(paths.pug.watch, ['pug']);
+  gulp.watch(settings.paths.sass.watch, ['sass']);
+  gulp.watch(settings.paths.pug.watch, ['pug']);
   gulp.watch('web/**/*.html').on('change', browserSync.reload);
 });
 
